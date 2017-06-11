@@ -98,8 +98,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <template is="dom-if" if="[[!user]]">
               <paper-button on-tap="login">Login</paper-button>
             </template>
+
             <template is="dom-if" if="[[user]]">
-              Hi [[user.displayName]]
+            Hi [[user.displayName]]
               <paper-button on-tap="logout">Logout</paper-button>
             </template>
 
@@ -111,7 +112,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             attr-for-selected="name"
             fallback-selection="view404"
             role="main">
-          <my-view1 name="view1"></my-view1>
+          <my-view1 name="view1" user="[[user]]"></my-view1>
           <my-view2 name="view2"></my-view2>
           <my-view3 name="view3"></my-view3>
           <my-view404 name="view404"></my-view404>
@@ -132,7 +133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             reflectToAttribute: true,
             observer: '_pageChanged',
           },
-          user: {
+          user : {
             type: Object,
             value: null
           },
@@ -154,6 +155,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Get root pattern for app-route, for more info about `rootPath` see:
         // https://www.polymer-project.org/2.0/docs/upgrade#urls-in-templates
         this.rootPattern = (new URL(this.rootPath)).pathname;
+      }
+
+      connectedCallback() {
+        super.connectedCallback()
+
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            this.user = user
+          } else {
+            this.user = null
+          }
+        })
       }
 
       _routePageChanged(page) {
@@ -187,7 +200,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.page = 'view404';
       }
 
-      login(){
+      login() {
         var provider = new firebase.auth.GoogleAuthProvider()
 
         firebase.auth().signInWithPopup(provider).then((result) => {
